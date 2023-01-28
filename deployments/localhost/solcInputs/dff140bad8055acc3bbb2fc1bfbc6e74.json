@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/EventStaking.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.7;\n\n// Uncomment this line to use console.log\n// import \"hardhat/console.sol\";\n\ncontract EventStaking {\n    address[] s_stakers;\n    uint256 public constant MINIMUM_ETH = 1 * 10 ** 18;\n    mapping(address => uint256) public s_addressToAmountStaked;\n\n    function fund() public payable {\n        require(msg.value >= MINIMUM_ETH, \"You need more ETH!\");\n        s_stakers.push(msg.sender);\n        s_addressToAmountStaked[msg.sender] += msg.value;\n    }\n\n    function getEth() public pure returns (uint256) {\n        return MINIMUM_ETH;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

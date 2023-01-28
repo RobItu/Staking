@@ -1,0 +1,134 @@
+{
+  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MINIMUM_ETH",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "fund",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getEth",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "s_addressToAmountStaked",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xcf0b8f03ac18a519f7669a5a4842dea4e416bae2d87f2bff5313a495e74cdd5c",
+  "receipt": {
+    "to": null,
+    "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "transactionIndex": 0,
+    "gasUsed": "278283",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xe6b5777121f8638b2a5bf2b1b6066c8e9e9eb8158cde36640650cdbae052c761",
+    "transactionHash": "0xcf0b8f03ac18a519f7669a5a4842dea4e416bae2d87f2bff5313a495e74cdd5c",
+    "logs": [],
+    "blockNumber": 1,
+    "cumulativeGasUsed": "278283",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "dff140bad8055acc3bbb2fc1bfbc6e74",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.8+commit.dddeac2f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"MINIMUM_ETH\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fund\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getEth\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"s_addressToAmountStaked\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/EventStaking.sol\":\"EventStaking\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/EventStaking.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity ^0.8.7;\\n\\n// Uncomment this line to use console.log\\n// import \\\"hardhat/console.sol\\\";\\n\\ncontract EventStaking {\\n    address[] s_stakers;\\n    uint256 public constant MINIMUM_ETH = 1 * 10 ** 18;\\n    mapping(address => uint256) public s_addressToAmountStaked;\\n\\n    function fund() public payable {\\n        require(msg.value >= MINIMUM_ETH, \\\"You need more ETH!\\\");\\n        s_stakers.push(msg.sender);\\n        s_addressToAmountStaked[msg.sender] += msg.value;\\n    }\\n\\n    function getEth() public pure returns (uint256) {\\n        return MINIMUM_ETH;\\n    }\\n}\\n\",\"keccak256\":\"0x327136cc0fe4bbd0d455dc475e74f9888f2806f795552e45e5f24a196113beae\",\"license\":\"UNLICENSED\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610417806100206000396000f3fe60806040526004361061003f5760003560e01c8063b60d428814610044578063c2e6127f1461004e578063cb05b93e1461008b578063d5e3af45146100b6575b600080fd5b61004c6100e1565b005b34801561005a57600080fd5b506100756004803603810190610070919061027e565b6101e7565b60405161008291906102c4565b60405180910390f35b34801561009757600080fd5b506100a06101ff565b6040516100ad91906102c4565b60405180910390f35b3480156100c257600080fd5b506100cb61020f565b6040516100d891906102c4565b60405180910390f35b670de0b6b3a764000034101561012c576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101239061033c565b60405180910390fd5b6000339080600181540180825580915050600190039060005260206000200160009091909190916101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555034600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546101de919061038b565b92505081905550565b60016020528060005260406000206000915090505481565b6000670de0b6b3a7640000905090565b670de0b6b3a764000081565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061024b82610220565b9050919050565b61025b81610240565b811461026657600080fd5b50565b60008135905061027881610252565b92915050565b6000602082840312156102945761029361021b565b5b60006102a284828501610269565b91505092915050565b6000819050919050565b6102be816102ab565b82525050565b60006020820190506102d960008301846102b5565b92915050565b600082825260208201905092915050565b7f596f75206e656564206d6f726520455448210000000000000000000000000000600082015250565b60006103266012836102df565b9150610331826102f0565b602082019050919050565b6000602082019050818103600083015261035581610319565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b6000610396826102ab565b91506103a1836102ab565b9250827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff038211156103d6576103d561035c565b5b82820190509291505056fea2646970667358221220b12654430af8eb766f58ade5f8d52b5f8afabc5f7c4f1461b0ca17ae4965379764736f6c63430008080033",
+  "deployedBytecode": "0x60806040526004361061003f5760003560e01c8063b60d428814610044578063c2e6127f1461004e578063cb05b93e1461008b578063d5e3af45146100b6575b600080fd5b61004c6100e1565b005b34801561005a57600080fd5b506100756004803603810190610070919061027e565b6101e7565b60405161008291906102c4565b60405180910390f35b34801561009757600080fd5b506100a06101ff565b6040516100ad91906102c4565b60405180910390f35b3480156100c257600080fd5b506100cb61020f565b6040516100d891906102c4565b60405180910390f35b670de0b6b3a764000034101561012c576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101239061033c565b60405180910390fd5b6000339080600181540180825580915050600190039060005260206000200160009091909190916101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555034600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546101de919061038b565b92505081905550565b60016020528060005260406000206000915090505481565b6000670de0b6b3a7640000905090565b670de0b6b3a764000081565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061024b82610220565b9050919050565b61025b81610240565b811461026657600080fd5b50565b60008135905061027881610252565b92915050565b6000602082840312156102945761029361021b565b5b60006102a284828501610269565b91505092915050565b6000819050919050565b6102be816102ab565b82525050565b60006020820190506102d960008301846102b5565b92915050565b600082825260208201905092915050565b7f596f75206e656564206d6f726520455448210000000000000000000000000000600082015250565b60006103266012836102df565b9150610331826102f0565b602082019050919050565b6000602082019050818103600083015261035581610319565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b6000610396826102ab565b91506103a1836102ab565b9250827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff038211156103d6576103d561035c565b5b82820190509291505056fea2646970667358221220b12654430af8eb766f58ade5f8d52b5f8afabc5f7c4f1461b0ca17ae4965379764736f6c63430008080033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 4,
+        "contract": "contracts/EventStaking.sol:EventStaking",
+        "label": "s_stakers",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_array(t_address)dyn_storage"
+      },
+      {
+        "astId": 15,
+        "contract": "contracts/EventStaking.sol:EventStaking",
+        "label": "s_addressToAmountStaked",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_address)dyn_storage": {
+        "base": "t_address",
+        "encoding": "dynamic_array",
+        "label": "address[]",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
