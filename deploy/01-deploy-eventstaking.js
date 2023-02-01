@@ -7,7 +7,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
 
-    args = [networkConfig[chainId]["minimumStakingAmount"]]
+    minimumStakingAmount = networkConfig[chainId]["minimumStakingAmount"]
+    interval = networkConfig[chainId]["interval"]
+
+    args = [minimumStakingAmount, interval]
 
     stakingContract = await deploy("EventStaking", {
         from: deployer,
