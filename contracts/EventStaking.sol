@@ -21,6 +21,7 @@ contract EventStaking {
 
     function rewards() external {
         //How do I prevent anyone from calling this function?
+        require(s_stakers.length > 0, "No stakers in pool");
         uint256 i;
         for (i = 0; i < s_stakers.length; i++) {
             address staker = s_stakers[i];
@@ -28,8 +29,9 @@ contract EventStaking {
         }
     }
 
-    function withdraw() public {
-        (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
+    function withdraw(uint256 amount) public {
+        require(amount > 0);
+        (bool callSuccess, ) = payable(msg.sender).call{value: amount}("");
         require(callSuccess, "Call failed");
     }
 
@@ -43,5 +45,9 @@ contract EventStaking {
 
     function getStakerAmount(address _address) public view returns (uint256) {
         return s_addressToAmountStaked[_address];
+    }
+
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }
