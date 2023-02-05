@@ -120,4 +120,16 @@ contract EventStaking is KeeperCompatibleInterface {
     function getStakingState() public view returns (StakingState) {
         return s_stakingState;
     }
+
+    function getInterval() public view returns (uint256) {
+        return i_interval;
+    }
+
+    function getEndTime() public view returns (uint256) {
+        return s_endStakingTime;
+    }
+
+    function getBlockTime() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
 }

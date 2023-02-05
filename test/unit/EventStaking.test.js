@@ -5,10 +5,11 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("EventStaking Unit Tests", function () {
-          let staking, entranceFee, percentage, endTime
+          let staking, entranceFee, percentage, endTime, interval
           chainId = network.config.chainId
           percentage = networkConfig[chainId]["percentage"]
           endTime = networkConfig[chainId]["endTime"]
+          interval = networkConfig[chainId]["interval"]
 
           beforeEach(async function () {
               await deployments.fixture(["all"])
@@ -18,12 +19,34 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           })
 
           describe("Constructor", function () {
-              it("Has correct entrance fee", async function () {
+              it("Has correct minimum staking requirement", async function () {
                   const minimumStakingAmount = await staking.getMinimumStakingAmount()
                   assert.equal(
                       minimumStakingAmount.toString(),
                       networkConfig[chainId]["minimumStakingAmount"]
                   )
+              })
+
+              it("Sets correct interval", async function () {
+                  contractInterval = await staking.getInterval()
+                  assert.equal(contractInterval, interval)
+              })
+
+              it("Sets correct endStakingTime", async function () {
+                  contractEndTime = await staking.getEndTime()
+                  assert.equal(contractEndTime, endTime)
+              })
+
+              it("Sets Staking state to OPEN", async function () {
+                  contractStakingState = await staking.getStakingState()
+                  assert.equal(contractStakingState.toString(), "0")
+              })
+
+              it("Sets correct starting block number", async function () {
+                  contractBlockNumber = await staking.getBlockTime()
+                  blockNumBefore = await ethers.provider.getBlockNumber()
+                  blockBefore = await ethers.provider.getBlock(blockNumBefore)
+                  assert.equal(contractBlockNumber.toString(), blockBefore.timestamp)
               })
           })
 
