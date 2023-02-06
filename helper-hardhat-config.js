@@ -7,6 +7,7 @@ const networkConfig = {
         entranceFee: ethers.utils.parseEther("0.01"),
         interval: "30",
         endTime: "60",
+        percentage: "5",
     },
     31337: {
         name: "hardhat",
@@ -14,6 +15,7 @@ const networkConfig = {
         percentage: 5,
         interval: "30",
         endTime: "60",
+        percentage: "5",
     },
 }
 

@@ -10,14 +10,16 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     minimumStakingAmount = networkConfig[chainId]["minimumStakingAmount"]
     interval = networkConfig[chainId]["interval"]
     endTime = networkConfig[chainId]["endTime"]
+    percentage = networkConfig[chainId]["percentage"]
 
-    args = [minimumStakingAmount, interval, endTime]
+    args = [minimumStakingAmount, interval, endTime, percentage]
 
     stakingContract = await deploy("EventStaking", {
         from: deployer,
         args: args,
         log: true,
         waitConfirmations: 1,
+        value: ethers.utils.parseEther("3"),
     })
 }
 

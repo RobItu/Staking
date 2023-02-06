@@ -7,15 +7,15 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
     : describe("EventStaking Unit Tests", function () {
           let staking, entranceFee, percentage, endTime, interval
           chainId = network.config.chainId
-          percentage = networkConfig[chainId]["percentage"]
-          endTime = networkConfig[chainId]["endTime"]
-          interval = networkConfig[chainId]["interval"]
 
           beforeEach(async function () {
               await deployments.fixture(["all"])
               deployer = (await getNamedAccounts()).deployer
               staking = await ethers.getContract("EventStaking", deployer)
               entranceFee = await staking.getMinimumStakingAmount()
+              interval = await staking.getInterval()
+              percentage = await staking.getPercentage()
+              endTime = await staking.getEndTime()
           })
 
           describe("Constructor", function () {
@@ -29,12 +29,12 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
               it("Sets correct interval", async function () {
                   contractInterval = await staking.getInterval()
-                  assert.equal(contractInterval, interval)
+                  assert.equal(contractInterval, networkConfig[chainId]["interval"])
               })
 
               it("Sets correct endStakingTime", async function () {
                   contractEndTime = await staking.getEndTime()
-                  assert.equal(contractEndTime, endTime)
+                  assert.equal(contractEndTime, networkConfig[chainId]["endTime"])
               })
 
               it("Sets Staking state to OPEN", async function () {
@@ -48,11 +48,28 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   blockBefore = await ethers.provider.getBlock(blockNumBefore)
                   assert.equal(contractBlockNumber.toString(), blockBefore.timestamp)
               })
+              //percentage check
           })
 
-          describe("Enter Staking", function () {
+          describe("Enter Staking Pool", function () {
               it("Throws error if entrance amount is too small", async function () {
-                  expect(staking.enterPool()).to.be.revertedWith("You need more ETH!")
+                  await expect(staking.enterPool()).to.be.revertedWith(
+                      "EventStaking_NotEnoughEthEntered"
+                  )
+              })
+
+              it("Throws error if staking pool is not open", async function () {
+                  const accounts = await ethers.getSigners()
+                  for (i = 1; i < 4; i++) {
+                      await staking.connect(accounts[i]).enterPool({ value: entranceFee })
+                  }
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  await staking.performUpkeep([])
+
+                  await expect(staking.enterPool({ value: entranceFee })).to.be.revertedWith(
+                      "EventStaking_PoolNotOpen"
+                  )
               })
 
               it("Records staker when they enter", async function () {
