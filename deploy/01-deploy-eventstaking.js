@@ -11,8 +11,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     interval = networkConfig[chainId]["interval"]
     endTime = networkConfig[chainId]["endTime"]
     percentage = networkConfig[chainId]["percentage"]
+    maxCap = networkConfig[chainId]["maxCap"]
 
-    args = [minimumStakingAmount, interval, endTime, percentage]
+    args = [minimumStakingAmount, interval, endTime, percentage, maxCap]
 
     stakingContract = await deploy("EventStaking", {
         from: deployer,

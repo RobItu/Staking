@@ -49,6 +49,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   assert.equal(contractBlockNumber.toString(), blockBefore.timestamp)
               })
               //percentage check
+              // maxCap check
           })
 
           describe("Enter Staking Pool", function () {
@@ -60,7 +61,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
               it("Throws error if staking pool is not open", async function () {
                   const accounts = await ethers.getSigners()
-                  for (i = 1; i < 4; i++) {
+                  for (i = 1; i < 3; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
@@ -69,6 +70,16 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
                   await expect(staking.enterPool({ value: entranceFee })).to.be.revertedWith(
                       "EventStaking_PoolNotOpen"
+                  )
+              })
+
+              it("Throws error if staking pool is full", async function () {
+                  const accounts = await ethers.getSigners()
+                  for (i = 1; i < 4; i++) {
+                      await staking.connect(accounts[i]).enterPool({ value: entranceFee })
+                  }
+                  await expect(staking.enterPool({ value: entranceFee })).to.be.revertedWith(
+                      "EventStaking_PoolIsFull"
                   )
               })
 

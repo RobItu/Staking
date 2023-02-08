@@ -8,6 +8,7 @@ const networkConfig = {
         interval: "30",
         endTime: "60",
         percentage: "5",
+        maxCap: ethers.utils.parseEther("3.03"),
     },
     31337: {
         name: "hardhat",
@@ -16,6 +17,7 @@ const networkConfig = {
         interval: "30",
         endTime: "60",
         percentage: "5",
+        maxCap: ethers.utils.parseEther("3.03"),
     },
 }
 

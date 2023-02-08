@@ -14,6 +14,7 @@ error EventStaking_UpkeepNotNeeded(
 );
 error EventStaking_TransferFailed();
 error EventStaking_NotEnoughStakers();
+error EventStaking_PoolIsFull();
 
 contract EventStaking is KeeperCompatibleInterface {
     enum StakingState {
@@ -21,8 +22,13 @@ contract EventStaking is KeeperCompatibleInterface {
         CLOSE,
         ENDED
     }
+    enum PoolCap {
+        OPEN,
+        FULL
+    }
 
     StakingState private s_stakingState;
+    PoolCap private s_poolCap;
     address[] public s_stakers;
     uint256 public immutable i_MinimumStakingAmount;
     mapping(address => uint256) public s_addressToAmountStaked;
@@ -30,6 +36,7 @@ contract EventStaking is KeeperCompatibleInterface {
     uint256 private s_lastTimeStamp;
     uint256 private s_endStakingTime;
     uint256 private s_percentage;
+    uint256 private s_maxCap;
 
     event StakingEnter(address indexed staker);
     event RewardsDistributed(uint256 indexed rewardAmount);
@@ -39,7 +46,8 @@ contract EventStaking is KeeperCompatibleInterface {
         uint256 minimumStakingAmount,
         uint256 interval,
         uint256 endTime,
-        uint256 percentage
+        uint256 percentage,
+        uint256 maxCap
     ) payable {
         i_MinimumStakingAmount = minimumStakingAmount;
         s_stakingState = StakingState.OPEN;
@@ -47,6 +55,8 @@ contract EventStaking is KeeperCompatibleInterface {
         s_lastTimeStamp = block.timestamp;
         s_endStakingTime = endTime;
         s_percentage = percentage;
+        s_poolCap = PoolCap.OPEN;
+        s_maxCap = maxCap;
     }
 
     function enterPool() public payable {
@@ -55,6 +65,12 @@ contract EventStaking is KeeperCompatibleInterface {
         }
         if (s_stakingState != StakingState.OPEN) {
             revert EventStaking_PoolNotOpen();
+        }
+        if (s_poolCap == PoolCap.FULL) {
+            revert EventStaking_PoolIsFull();
+        }
+        if (address(this).balance == s_maxCap) {
+            s_poolCap = PoolCap.FULL;
         }
         s_stakers.push(msg.sender);
         s_addressToAmountStaked[msg.sender] += msg.value;
@@ -84,10 +100,7 @@ contract EventStaking is KeeperCompatibleInterface {
                 s_stakers.length,
                 uint256(s_stakingState)
             );
-        } //Logic error: On the first round of rewards the pool will close and not reopen. Must re-open briefly to issue rewards.
-        // To prevent illegal entry during the brief open period:
-        // - Prevent entry if pool is closed.
-        // - Unit test
+        }
         s_stakingState = StakingState.CLOSE;
         rewards(s_percentage);
         if ((block.timestamp - s_lastTimeStamp) > s_endStakingTime) {
