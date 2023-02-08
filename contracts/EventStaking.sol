@@ -173,4 +173,8 @@ contract EventStaking is KeeperCompatibleInterface {
     function getPercentage() public view returns (uint256) {
         return s_percentage;
     }
+
+    function getMaxCap() public view returns (uint256) {
+        return s_maxCap;
+    }
 }

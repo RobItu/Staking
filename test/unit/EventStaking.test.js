@@ -48,8 +48,15 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   blockBefore = await ethers.provider.getBlock(blockNumBefore)
                   assert.equal(contractBlockNumber.toString(), blockBefore.timestamp)
               })
-              //percentage check
-              // maxCap check
+              it("Sets rewards percentage correctly", async function () {
+                  contractPercentage = await staking.getPercentage()
+                  assert.equal(contractPercentage.toString(), networkConfig[chainId]["percentage"])
+              })
+
+              it("Sets staking pool's max cap correctly", async function () {
+                  contractMaxCap = await staking.getMaxCap()
+                  assert.equal(contractMaxCap.toString(), networkConfig[chainId]["maxCap"])
+              })
           })
 
           describe("Enter Staking Pool", function () {
@@ -97,12 +104,20 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       networkConfig[chainId]["minimumStakingAmount"]
                   )
               })
+
+              //TEST: Event emitted after staker enters
           })
           describe("CheckUpkeep", function () {
               it("returns false if staking pool is close", async function () {
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
               })
+              //TEST: Contract state changes to OPEN when enough time has passed and pool has not ended
+              //TEST: Returns false if Staking pool is not OPEN
+              //TEST: Returns false if there are no stakers
+              //TEST: Returns false if there's insufficient funds
+              //TEST: Returns false if not enough time has passed
+              //TEST: Returns true if all conditions are met
           })
           describe("Rewards", function () {
               it("Correctly calculates percentage of amount to be awarded", async function () {
