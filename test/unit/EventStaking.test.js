@@ -105,7 +105,12 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   )
               })
 
-              //TEST: Event emitted after staker enters
+              it("Emits event after staker enters pool", async function () {
+                  await expect(staking.enterPool({ value: entranceFee })).to.emit(
+                      staking,
+                      "StakingEnter"
+                  )
+              })
           })
           describe("CheckUpkeep", function () {
               it("returns false if staking pool is close", async function () {
