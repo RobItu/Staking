@@ -113,15 +113,26 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
           })
           describe("CheckUpkeep", function () {
-              it("returns false if staking pool is close", async function () {
+              it("returns false if staking pool is not open", async function () {
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
               })
               //TEST: Contract state changes to OPEN when enough time has passed and pool has not ended
-              //TEST: Returns false if Staking pool is not OPEN
               //TEST: Returns false if there are no stakers
-              //TEST: Returns false if there's insufficient funds
+              it("returns false if there are no stakers", async function () {
+                  await network.provider.send("evm_increaseTime", [endTime.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  const { upkeepNeeded } = await staking.callStatic.checkUpkeep("0x")
+                  await assert(!upkeepNeeded)
+              })
               //TEST: Returns false if not enough time has passed
+              it("returns false if not enough time has passed", async function () {
+                  await network.provider.send("evm_increaseTime", [1])
+                  await network.provider.send("evm_mine", [])
+                  await staking.enterPool({ value: entranceFee })
+                  const { upkeepNeeded } = await staking.callStatic.checkUpkeep("0x")
+                  await assert(!upkeepNeeded)
+              })
               //TEST: Returns true if all conditions are met
           })
           describe("Rewards", function () {
