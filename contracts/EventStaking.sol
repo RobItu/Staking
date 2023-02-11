@@ -71,6 +71,7 @@ contract EventStaking is KeeperCompatibleInterface {
         }
         if (address(this).balance == s_maxCap) {
             s_poolCap = PoolCap.FULL;
+            s_stakingState = StakingState.CLOSE;
         }
         s_stakers.push(msg.sender);
         s_addressToAmountStaked[msg.sender] += msg.value;
