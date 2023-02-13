@@ -119,22 +119,22 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
               it("contract state changes to OPEN when enough time has passed and pool has not ended", async function () {
                   const accounts = await ethers.getSigners()
-                  let stakingStateOpen = await staking.getStakingState()
-                  assert.equal(stakingStateOpen.toString(), "0")
+                  let initialStakingState = await staking.getStakingState()
+                  assert.equal(initialStakingState.toString(), "0")
 
                   for (i = 1; i < 4; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
-                  let stakingStateClosed = await staking.getStakingState()
-                  assert.equal(stakingStateClosed.toString(), "1")
+                  let preUpkeepStakingState = await staking.getStakingState()
+                  assert.equal(preUpkeepStakingState.toString(), "1")
 
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
                   await staking.checkUpkeep("0x")
                   const { upkeepNeeded } = await staking.callStatic.checkUpkeep("0x")
-                  newStakingState = await staking.getStakingState()
+                  postUpkeepStakingState = await staking.getStakingState()
 
-                  assert.equal(newStakingState.toString(), "0")
+                  assert.equal(postUpkeepStakingState.toString(), "0")
                   await assert(upkeepNeeded)
               })
               it("returns false if there are no stakers", async function () {

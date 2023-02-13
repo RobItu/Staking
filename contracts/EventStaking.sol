@@ -63,15 +63,15 @@ contract EventStaking is KeeperCompatibleInterface {
         if (msg.value < i_MinimumStakingAmount) {
             revert EventStaking_NotEnoughEthEntered();
         }
-        if (s_stakingState != StakingState.OPEN) {
-            revert EventStaking_PoolNotOpen();
-        }
         if (s_poolCap == PoolCap.FULL) {
             revert EventStaking_PoolIsFull();
         }
-        if (address(this).balance == s_maxCap) {
-            s_poolCap = PoolCap.FULL;
+        if (s_stakingState != StakingState.OPEN) {
+            revert EventStaking_PoolNotOpen();
+        }
+        if (address(this).balance >= s_maxCap) {
             s_stakingState = StakingState.CLOSE;
+            s_poolCap = PoolCap.FULL;
         }
         s_stakers.push(msg.sender);
         s_addressToAmountStaked[msg.sender] += msg.value;
