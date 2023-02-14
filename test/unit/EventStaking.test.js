@@ -1,3 +1,4 @@
+const { latest } = require("@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time")
 const { assert, expect } = require("chai")
 const { getNamedAccounts, deployments, ethers, network } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
@@ -6,7 +7,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
     ? describe.skip
     : describe("EventStaking Unit Tests", function () {
           let staking, entranceFee, percentage, endTime, interval
-          chainId = network.config.chainId
+          const chainId = network.config.chainId
 
           beforeEach(async function () {
               await deployments.fixture(["all"])
@@ -28,33 +29,33 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
 
               it("Sets correct interval", async function () {
-                  contractInterval = await staking.getInterval()
+                  const contractInterval = await staking.getInterval()
                   assert.equal(contractInterval, networkConfig[chainId]["interval"])
               })
 
               it("Sets correct endStakingTime", async function () {
-                  contractEndTime = await staking.getEndTime()
+                  const contractEndTime = await staking.getEndTime()
                   assert.equal(contractEndTime, networkConfig[chainId]["endTime"])
               })
 
               it("Sets Staking state to OPEN", async function () {
-                  contractStakingState = await staking.getStakingState()
+                  const contractStakingState = await staking.getStakingState()
                   assert.equal(contractStakingState.toString(), "0")
               })
 
               it("Sets correct starting block number", async function () {
-                  contractBlockNumber = await staking.getBlockTime()
-                  blockNumBefore = await ethers.provider.getBlockNumber()
-                  blockBefore = await ethers.provider.getBlock(blockNumBefore)
+                  const contractBlockNumber = await staking.getLatestTimestamp()
+                  const blockNumBefore = await ethers.provider.getBlockNumber()
+                  const blockBefore = await ethers.provider.getBlock(blockNumBefore)
                   assert.equal(contractBlockNumber.toString(), blockBefore.timestamp)
               })
               it("Sets rewards percentage correctly", async function () {
-                  contractPercentage = await staking.getPercentage()
+                  const contractPercentage = await staking.getPercentage()
                   assert.equal(contractPercentage.toString(), networkConfig[chainId]["percentage"])
               })
 
               it("Sets staking pool's max cap correctly", async function () {
-                  contractMaxCap = await staking.getMaxCap()
+                  const contractMaxCap = await staking.getMaxCap()
                   assert.equal(contractMaxCap.toString(), networkConfig[chainId]["maxCap"])
               })
           })
@@ -98,7 +99,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
               it("Correctly enters contract", async function () {
                   await staking.enterPool({ value: entranceFee })
-                  stakerAmount = await staking.getStakerAmount(deployer)
+                  const stakerAmount = await staking.getStakerAmount(deployer)
                   assert.equal(
                       stakerAmount.toString(),
                       networkConfig[chainId]["minimumStakingAmount"]
@@ -125,14 +126,14 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   for (i = 1; i < 4; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
-                  let preUpkeepStakingState = await staking.getStakingState()
+                  const preUpkeepStakingState = await staking.getStakingState()
                   assert.equal(preUpkeepStakingState.toString(), "1")
 
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
                   await staking.checkUpkeep("0x")
                   const { upkeepNeeded } = await staking.callStatic.checkUpkeep("0x")
-                  postUpkeepStakingState = await staking.getStakingState()
+                  const postUpkeepStakingState = await staking.getStakingState()
 
                   assert.equal(postUpkeepStakingState.toString(), "0")
                   await assert(upkeepNeeded)
@@ -172,6 +173,47 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await network.provider.send("evm_mine", [])
                   const tx = await staking.performUpkeep([])
                   assert(tx)
+              })
+
+              it("Changes staking state to close", async function () {
+                  const initialStakingState = await staking.getStakingState()
+                  assert.equal(initialStakingState.toString(), "0")
+                  await staking.enterPool({ value: entranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  await staking.performUpkeep([])
+                  const finalStakingState = await staking.getStakingState()
+                  assert.equal(finalStakingState.toString(), "1")
+              })
+
+              it("Triggers reward function", async function () {
+                  await staking.enterPool({ value: entranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  await expect(staking.performUpkeep([])).to.emit(staking, "RewardsDistributed")
+              })
+
+              it("Updates latest timestamp", async function () {
+                  const initialTimeStamp = await staking.getLatestTimestamp()
+                  await staking.enterPool({ value: entranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  await staking.performUpkeep([])
+                  const latestTimeStamp = await staking.getLatestTimestamp()
+                  const blockNumBefore = await ethers.provider.getBlockNumber()
+                  const blockBefore = await ethers.provider.getBlock(blockNumBefore)
+                  assert(initialTimeStamp < latestTimeStamp)
+                  assert.equal(latestTimeStamp.toString(), blockBefore.timestamp)
+              })
+
+              it("Triggers withdraw function once end staking interval passes", async function () {
+                  const accounts = await ethers.getSigners()
+                  for (i = 1; i < 4; i++) {
+                      await staking.connect(accounts[i]).enterPool({ value: entranceFee })
+                  }
+                  await network.provider.send("evm_increaseTime", [endTime.toNumber() + 10])
+                  await network.provider.send("evm_mine", [])
+                  await expect(staking.performUpkeep([])).to.emit(staking, "Withdrawal")
               })
           })
           describe("Rewards", function () {

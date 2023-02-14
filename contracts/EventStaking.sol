@@ -102,11 +102,11 @@ contract EventStaking is KeeperCompatibleInterface {
                 uint256(s_stakingState)
             );
         }
-        s_stakingState = StakingState.CLOSE;
-        rewards(s_percentage);
         if ((block.timestamp - s_lastTimeStamp) > s_endStakingTime) {
             withdraw();
         }
+        s_stakingState = StakingState.CLOSE;
+        rewards(s_percentage);
         s_lastTimeStamp = block.timestamp;
     }
 
@@ -167,7 +167,7 @@ contract EventStaking is KeeperCompatibleInterface {
         return s_endStakingTime;
     }
 
-    function getBlockTime() public view returns (uint256) {
+    function getLatestTimestamp() public view returns (uint256) {
         return s_lastTimeStamp;
     }
 
