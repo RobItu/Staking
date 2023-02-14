@@ -158,6 +158,22 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await assert(upkeepNeeded)
               })
           })
+          describe("PerformUpkeep", function () {
+              it("Reverts with error if upkeep not needed", async function () {
+                  await staking.enterPool({ value: entranceFee })
+                  await expect(staking.performUpkeep([])).to.be.revertedWith(
+                      "EventStaking_UpkeepNotNeeded"
+                  )
+              })
+
+              it("Only runs when upkeep is true", async function () {
+                  await staking.enterPool({ value: entranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  const tx = await staking.performUpkeep([])
+                  assert(tx)
+              })
+          })
           describe("Rewards", function () {
               it("Correctly calculates percentage of amount to be awarded", async function () {
                   await staking.enterPool({ value: entranceFee })
