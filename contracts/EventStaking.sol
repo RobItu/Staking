@@ -111,9 +111,6 @@ contract EventStaking is KeeperCompatibleInterface {
     }
 
     function rewards(uint256 percentage) internal {
-        if (s_stakers.length <= 0) {
-            revert EventStaking_NotEnoughStakers();
-        }
         uint256 i;
         for (i = 0; i < s_stakers.length; i++) {
             address staker = s_stakers[i];
@@ -125,7 +122,7 @@ contract EventStaking is KeeperCompatibleInterface {
 
     function withdraw() internal {
         uint256 i;
-        for (i = 1; i < s_stakers.length; i++) {
+        for (i = 0; i < s_stakers.length; i++) {
             address staker = s_stakers[i];
             uint256 amount = s_addressToAmountStaked[staker];
             (bool callSuccess, ) = payable(staker).call{value: amount}("");

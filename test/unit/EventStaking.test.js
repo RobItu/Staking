@@ -219,9 +219,11 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           describe("Rewards", function () {
               it("Correctly calculates percentage of amount to be awarded", async function () {
                   await staking.enterPool({ value: entranceFee })
-                  originalStakingAmount = await staking.getStakerAmount(deployer)
-                  await staking.rewards()
-                  newStakingAmount = await staking.getStakerAmount(deployer)
+                  const originalStakingAmount = await staking.getStakerAmount(deployer)
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 10])
+                  await network.provider.send("evm_mine", [])
+                  await staking.performUpkeep([])
+                  const newStakingAmount = await staking.getStakerAmount(deployer)
                   assert.equal(
                       (
                           ((newStakingAmount - originalStakingAmount) * 100) /
@@ -230,12 +232,13 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       percentage
                   )
               })
-
               it("Distributes the rewards to stakers", async function () {
                   await staking.enterPool({ value: entranceFee })
-                  originalStakingAmount = await staking.getStakerAmount(deployer)
-                  await staking.rewards()
-                  newStakingAmount = await staking.getStakerAmount(deployer)
+                  const originalStakingAmount = await staking.getStakerAmount(deployer)
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 10])
+                  await network.provider.send("evm_mine", [])
+                  await staking.performUpkeep([])
+                  const newStakingAmount = await staking.getStakerAmount(deployer)
                   assert(
                       newStakingAmount.toString(),
                       originalStakingAmount +
@@ -247,44 +250,35 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               beforeEach(async function () {
                   await staking.enterPool({ value: entranceFee })
               })
-
-              it("Withdraws initial amount staked", async function () {
-                  accounts = await ethers.getSigners()
-                  stakerAccount = staking.connect(accounts[1])
-                  await stakerAccount.enterPool({ value: entranceFee })
-                  startingBalance = await accounts[1].getBalance()
-
-                  transactionResponse = await stakerAccount.withdraw(entranceFee)
-                  transactionReceipt = await transactionResponse.wait(1)
-                  const { gasUsed, effectiveGasPrice } = transactionReceipt
-                  const gasCost = gasUsed.mul(effectiveGasPrice)
-                  endingBalance = await accounts[1].getBalance()
-
-                  assert.equal(
-                      startingBalance.add(entranceFee).toString(),
-                      endingBalance.add(gasCost).toString()
-                  )
-              })
               it("Withdraws starting amount and rewards", async function () {
-                  accounts = await ethers.getSigners()
-                  stakerAccount = staking.connect(accounts[1])
-                  await stakerAccount.enterPool({ value: entranceFee })
-                  startingAccountBalance = await accounts[1].getBalance()
-                  stakerBalance = await stakerAccount.getStakerAmount(accounts[1].address)
+                  const accounts = await ethers.getSigners()
+                  const staker = await staking
+                      .connect(accounts[1])
+                      .enterPool({ value: entranceFee })
 
-                  triggerRewards = staking.connect(accounts[0])
-                  transactionResponse0 = await triggerRewards.rewards()
+                  const startingAccountBalance = await accounts[1].getBalance()
+                  const stakerBalance = await staking.getStakerAmount(accounts[1].address)
 
-                  stakerBalanceWithRewards = await stakerAccount.getStakerAmount(
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 10])
+                  await network.provider.send("evm_mine", [])
+                  await staking.connect(accounts[0]).performUpkeep([])
+
+                  const stakerBalanceWithRewards = await staking.getStakerAmount(
                       accounts[1].address
                   )
+                  await network.provider.send("evm_increaseTime", [endTime.toNumber() + 10])
+                  await network.provider.send("evm_mine", [])
 
-                  transactionResponse = await stakerAccount.withdraw(stakerBalanceWithRewards)
-                  transactionReceipt = await transactionResponse.wait(1)
-                  const { gasUsed, effectiveGasPrice } = transactionReceipt
+                  const transactionResponse = await staking.connect(accounts[0]).performUpkeep([])
+                  const transactionReceipt = await transactionResponse.wait(1)
+                  //------------------------------------------------------------------------------------------//
+                  console.log(transactionReceipt.logs)
+                  //------------------------------------------------------------------------------------------//
+
+                  //const { gasUsed, effectiveGasPrice } = transactionReceipt
                   const gasCost = gasUsed.mul(effectiveGasPrice)
-                  endingAccountBalance = await accounts[1].getBalance()
-                  rewardAmount = ((stakerBalance * percentage) / 100).toString()
+                  const endingAccountBalance = await accounts[1].getBalance()
+                  const rewardAmount = ((stakerBalance * percentage) / 100).toString()
 
                   assert.equal(
                       startingAccountBalance.add(entranceFee).add(rewardAmount).toString(),
