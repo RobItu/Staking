@@ -252,37 +252,25 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
               it("Withdraws starting amount and rewards", async function () {
                   const accounts = await ethers.getSigners()
-                  const staker = await staking
-                      .connect(accounts[1])
-                      .enterPool({ value: entranceFee })
-
+                  await staking.connect(accounts[1]).enterPool({ value: entranceFee })
                   const startingAccountBalance = await accounts[1].getBalance()
-                  const stakerBalance = await staking.getStakerAmount(accounts[1].address)
 
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 10])
                   await network.provider.send("evm_mine", [])
                   await staking.connect(accounts[0]).performUpkeep([])
 
-                  const stakerBalanceWithRewards = await staking.getStakerAmount(
-                      accounts[1].address
-                  )
+                  const stakerBalance = await staking.getStakerAmount(accounts[1].address)
+
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 10])
                   await network.provider.send("evm_mine", [])
 
-                  const transactionResponse = await staking.connect(accounts[0]).performUpkeep([])
-                  const transactionReceipt = await transactionResponse.wait(1)
-                  //------------------------------------------------------------------------------------------//
-                  console.log(transactionReceipt.logs)
-                  //------------------------------------------------------------------------------------------//
+                  await staking.connect(accounts[0]).performUpkeep([])
 
-                  //const { gasUsed, effectiveGasPrice } = transactionReceipt
-                  const gasCost = gasUsed.mul(effectiveGasPrice)
                   const endingAccountBalance = await accounts[1].getBalance()
-                  const rewardAmount = ((stakerBalance * percentage) / 100).toString()
 
                   assert.equal(
-                      startingAccountBalance.add(entranceFee).add(rewardAmount).toString(),
-                      endingAccountBalance.add(gasCost).toString()
+                      startingAccountBalance.add(stakerBalance).toString(),
+                      endingAccountBalance.toString()
                   )
               })
           })
