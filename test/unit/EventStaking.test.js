@@ -33,7 +33,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   assert.equal(contractInterval, networkConfig[chainId]["interval"])
               })
 
-              it("Sets correct endStakingTime", async function () {
+              it("Sets correct endTime", async function () {
                   const contractEndTime = await staking.getEndTime()
                   assert.equal(contractEndTime, networkConfig[chainId]["endTime"])
               })
@@ -63,7 +63,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           describe("Enter Staking Pool", function () {
               it("Throws error if entrance amount is too small", async function () {
                   await expect(staking.enterPool()).to.be.revertedWith(
-                      "EventStaking_NotEnoughEthEntered"
+                      "EventStaking__NotEnoughEthEntered"
                   )
               })
 
@@ -77,7 +77,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await staking.performUpkeep([])
 
                   await expect(staking.enterPool({ value: entranceFee })).to.be.revertedWith(
-                      "EventStaking_PoolNotOpen"
+                      "EventStaking__PoolNotOpen"
                   )
               })
 
@@ -87,7 +87,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
                   await expect(staking.enterPool({ value: entranceFee })).to.be.revertedWith(
-                      "EventStaking_PoolIsFull"
+                      "EventStaking__PoolIsFull"
                   )
               })
 
@@ -97,7 +97,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   assert.equal(staker.toString(), deployer)
               })
 
-              it("Correctly enters contract", async function () {
+              it("Contract receives correct amount upon entry", async function () {
                   await staking.enterPool({ value: entranceFee })
                   const stakerAmount = await staking.getStakerAmount(deployer)
                   assert.equal(
@@ -163,7 +163,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               it("Reverts with error if upkeep not needed", async function () {
                   await staking.enterPool({ value: entranceFee })
                   await expect(staking.performUpkeep([])).to.be.revertedWith(
-                      "EventStaking_UpkeepNotNeeded"
+                      "EventStaking__UpkeepNotNeeded"
                   )
               })
 
@@ -284,7 +284,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await network.provider.send("evm_mine", [])
 
                   await expect(testHelper.withdraw()).to.be.revertedWith(
-                      "EventStaking_TransferFailed"
+                      "EventStaking__TransferFailed"
                   )
               })
           })

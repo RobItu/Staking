@@ -3,18 +3,23 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
-error EventStaking_PoolNotOpen();
-error EventStaking_NotEnoughEthEntered();
-error EventStaking_UpkeepNotNeeded(
+error EventStaking__PoolNotOpen();
+error EventStaking__NotEnoughEthEntered();
+error EventStaking__UpkeepNotNeeded(
     uint256 currentBalance,
     uint256 numPlayers,
     uint256 StakingState
 );
-error EventStaking_TransferFailed();
-error EventStaking_NotEnoughStakers();
-error EventStaking_PoolIsFull();
+error EventStaking__TransferFailed();
+error EventStaking__NotEnoughStakers();
+error EventStaking__PoolIsFull();
+
+/**
+ * @title A Staking Contract
+ * @author Roberto Iturralde
+ * @notice This contract is for creating an untamperable and transparent staking smart contract
+ * @dev This contract implements Chainlink Automation
+ */
 
 contract EventStaking is KeeperCompatibleInterface {
     enum StakingState {
@@ -42,6 +47,14 @@ contract EventStaking is KeeperCompatibleInterface {
     event RewardsDistributed(uint256 indexed rewardAmount);
     event Withdrawal(address staker, uint256 balance);
 
+    /**
+     * @param minimumStakingAmount Minimum staking amount in ETH
+     * @param interval How often should rewards be issued
+     * @param endTime Time until staking pool becomes unlocked and funds withdrawn
+     * @param percentage Percentage (integer) of rewards distributed
+     * @param maxCap Maximum pool capacity in ETH
+     */
+
     constructor(
         uint256 minimumStakingAmount,
         uint256 interval,
@@ -61,13 +74,13 @@ contract EventStaking is KeeperCompatibleInterface {
 
     function enterPool() public payable {
         if (msg.value < i_MinimumStakingAmount) {
-            revert EventStaking_NotEnoughEthEntered();
+            revert EventStaking__NotEnoughEthEntered();
         }
         if (s_poolCap == PoolCap.FULL) {
-            revert EventStaking_PoolIsFull();
+            revert EventStaking__PoolIsFull();
         }
         if (s_stakingState != StakingState.OPEN) {
-            revert EventStaking_PoolNotOpen();
+            revert EventStaking__PoolNotOpen();
         }
         if (address(this).balance >= s_maxCap) {
             s_stakingState = StakingState.CLOSE;
@@ -77,6 +90,11 @@ contract EventStaking is KeeperCompatibleInterface {
         s_addressToAmountStaked[msg.sender] += msg.value;
         emit StakingEnter(msg.sender);
     }
+
+    /**
+     * @dev Chainlink Automation function that verifies if upkeep is needed
+     * @dev When Upkeep is needed, it will call performUpkeep
+     */
 
     function checkUpkeep(
         bytes memory /*checkData */
@@ -93,10 +111,14 @@ contract EventStaking is KeeperCompatibleInterface {
         upkeepNeeded = (isOpen && hasStakers && hasBalance && timePassed);
     }
 
+    /**
+     * @dev Once upkeep is needed, performUpkeep will call rewards function
+     * @dev If enough time (endTime) has passed, it will call withdraw function
+     */
     function performUpkeep(bytes calldata /*performData */) external override {
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
-            revert EventStaking_UpkeepNotNeeded(
+            revert EventStaking__UpkeepNotNeeded(
                 address(this).balance,
                 s_stakers.length,
                 uint256(s_stakingState)
@@ -127,7 +149,7 @@ contract EventStaking is KeeperCompatibleInterface {
             uint256 amount = s_addressToAmountStaked[staker];
             (bool callSuccess, ) = payable(staker).call{value: amount}("");
             if (!callSuccess) {
-                revert EventStaking_TransferFailed();
+                revert EventStaking__TransferFailed();
             }
             emit Withdrawal(staker, amount);
             delete s_stakers[i];
@@ -147,10 +169,6 @@ contract EventStaking is KeeperCompatibleInterface {
     function getStakerAmount(address _address) public view returns (uint256) {
         return s_addressToAmountStaked[_address];
     }
-
-    // function getContractBalance() public view returns (uint256) {
-    //     return address(this).balance;
-    // }
 
     function getStakingState() public view returns (StakingState) {
         return s_stakingState;
