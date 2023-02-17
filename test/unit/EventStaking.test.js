@@ -273,5 +273,19 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       endingAccountBalance.toString()
                   )
               })
+              it("Reverts with error if transfer fails", async function () {
+                  await deployments.fixture(["test"])
+                  const player = (await getNamedAccounts()).player
+                  const testHelper = await ethers.getContract("TestHelper", player)
+                  await testHelper.fundMe({ value: ethers.utils.parseEther("0.03") })
+                  await testHelper.fundContract(ethers.utils.parseEther("0.02"))
+
+                  await network.provider.send("evm_increaseTime", [endTime.toNumber() + 10])
+                  await network.provider.send("evm_mine", [])
+
+                  await expect(testHelper.withdraw()).to.be.revertedWith(
+                      "EventStaking_TransferFailed"
+                  )
+              })
           })
       })

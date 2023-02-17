@@ -15,13 +15,13 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
     const args = [minimumStakingAmount, interval, endTime, percentage, maxCap]
 
-    const stakingContract = await deploy("EventStaking", {
+    const testHelper = await deploy("TestHelper", {
         from: deployer,
         args: args,
         log: true,
         waitConfirmations: 1,
-        value: ethers.utils.parseEther("3"),
+        //value: ethers.utils.parseEther("3"),
     })
 }
 
-module.exports.tags = ["all"]
+module.exports.tags = ["test"]

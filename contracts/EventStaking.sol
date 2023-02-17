@@ -148,9 +148,9 @@ contract EventStaking is KeeperCompatibleInterface {
         return s_addressToAmountStaked[_address];
     }
 
-    function getContractBalance() public view returns (uint256) {
-        return address(this).balance;
-    }
+    // function getContractBalance() public view returns (uint256) {
+    //     return address(this).balance;
+    // }
 
     function getStakingState() public view returns (StakingState) {
         return s_stakingState;
