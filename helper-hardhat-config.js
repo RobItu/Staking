@@ -4,20 +4,19 @@ const { ethers } = require("hardhat")
 const networkConfig = {
     5: {
         name: "goerli",
-        entranceFee: ethers.utils.parseEther("0.01"),
-        interval: "30",
-        endTime: "60",
-        percentage: "5",
-        maxCap: ethers.utils.parseEther("3.03"),
+        minimumStakingAmount: ethers.utils.parseEther("0.01"),
+        interval: 30,
+        endTime: 60,
+        percentage: 5,
+        maxCap: ethers.utils.parseEther("0.03"),
     },
     31337: {
         name: "hardhat",
         minimumStakingAmount: ethers.utils.parseEther("0.01"),
         percentage: 5,
-        interval: "30",
-        endTime: "60",
-        percentage: "5",
-        maxCap: ethers.utils.parseEther("3.03"),
+        interval: 30,
+        endTime: 60,
+        maxCap: ethers.utils.parseEther("0.03"),
     },
 }
 

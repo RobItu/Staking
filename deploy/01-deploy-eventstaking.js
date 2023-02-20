@@ -19,9 +19,14 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         from: deployer,
         args: args,
         log: true,
-        waitConfirmations: 1,
-        value: ethers.utils.parseEther("3"),
+        waitConfirmations: 5,
+        value: ethers.utils.parseEther("0.1"),
     })
+
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+        log("Verifying...")
+        await verify(stakingContract.address, args)
+    }
 }
 
 module.exports.tags = ["all"]
