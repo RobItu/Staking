@@ -43,5 +43,33 @@ developmentChains.includes(network.name)
                       })
                   })
               })
+
+              it("Withdraws all funds correctly", async function () {
+                  //tx = await staking.enterPool({ value: entranceFee })
+                  //await tx.wait(1)
+                  const startingAccountBalance = await deployer.getBalance() //how to get balance of metamask wallet?
+
+                  await new Promise(async (resolve, reject) => {
+                      staking.once("Withdrawal", async () => {
+                          console.log("Withdrawal initiated...")
+                          try {
+                              setTimeout(async () => {
+                                  const stakerBalance = await staking.getStakerAmount(
+                                      deployer.address
+                                  )
+                                  const endingAccountBalance = await accounts[1].getBalance()
+                                  assert.equal(
+                                      startingAccountBalance.add(stakerBalance).toString(),
+                                      endingAccountBalance.toString()
+                                  )
+                                  resolve()
+                              }, 15000)
+                          } catch (error) {
+                              console.log(error)
+                              reject(e)
+                          }
+                      })
+                  })
+              })
           })
       })

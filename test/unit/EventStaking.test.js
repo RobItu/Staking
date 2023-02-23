@@ -118,7 +118,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
               })
-              it("contract state changes to OPEN when enough time has passed and pool has not ended", async function () {
+              it("contract state changes to OPEN when pool is full and pool has not ended", async function () {
                   const accounts = await ethers.getSigners()
                   let initialStakingState = await staking.getStakingState()
                   assert.equal(initialStakingState.toString(), "0")
