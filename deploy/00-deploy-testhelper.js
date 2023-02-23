@@ -12,8 +12,16 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const endTime = networkConfig[chainId]["endTime"]
     const percentage = networkConfig[chainId]["percentage"]
     const maxCap = networkConfig[chainId]["maxCap"]
+    const minimumContractBalance = networkConfig[chainId]["minimumContractBalance"]
 
-    const args = [minimumStakingAmount, interval, endTime, percentage, maxCap]
+    const args = [
+        minimumStakingAmount,
+        interval,
+        endTime,
+        percentage,
+        maxCap,
+        minimumContractBalance,
+    ]
 
     const testHelper = await deploy("TestHelper", {
         from: deployer,

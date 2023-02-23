@@ -69,7 +69,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
               it("Throws error if staking pool is not open", async function () {
                   const accounts = await ethers.getSigners()
-                  for (i = 1; i < 3; i++) {
+                  for (i = 0; i < 1; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
@@ -83,7 +83,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
               it("Throws error if staking pool is full", async function () {
                   const accounts = await ethers.getSigners()
-                  for (i = 1; i < 4; i++) {
+                  for (i = 1; i < 3; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
                   await expect(staking.enterPool({ value: entranceFee })).to.be.revertedWith(
@@ -123,7 +123,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   let initialStakingState = await staking.getStakingState()
                   assert.equal(initialStakingState.toString(), "0")
 
-                  for (i = 1; i < 4; i++) {
+                  for (i = 1; i < 3; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
                   const preUpkeepStakingState = await staking.getStakingState()
@@ -208,7 +208,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
               it("Triggers withdraw function once end staking interval passes", async function () {
                   const accounts = await ethers.getSigners()
-                  for (i = 1; i < 4; i++) {
+                  for (i = 1; i < 2; i++) {
                       await staking.connect(accounts[i]).enterPool({ value: entranceFee })
                   }
                   await network.provider.send("evm_increaseTime", [endTime.toNumber() + 10])

@@ -6,21 +6,30 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
+    const blockConfirmations = networkConfig[chainId]["blockConfirmations"]
 
     const minimumStakingAmount = networkConfig[chainId]["minimumStakingAmount"]
     const interval = networkConfig[chainId]["interval"]
     const endTime = networkConfig[chainId]["endTime"]
     const percentage = networkConfig[chainId]["percentage"]
     const maxCap = networkConfig[chainId]["maxCap"]
+    const minimumContractBalance = networkConfig[chainId]["minimumContractBalance"]
 
-    const args = [minimumStakingAmount, interval, endTime, percentage, maxCap]
+    const args = [
+        minimumStakingAmount,
+        interval,
+        endTime,
+        percentage,
+        maxCap,
+        minimumContractBalance,
+    ]
 
     const stakingContract = await deploy("EventStaking", {
         from: deployer,
         args: args,
         log: true,
-        waitConfirmations: 5,
-        value: ethers.utils.parseEther("0.1"),
+        waitConfirmations: blockConfirmations || 1,
+        value: ethers.utils.parseEther("0.01"),
     })
 
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {

@@ -11,9 +11,17 @@ contract TestHelper {
         uint256 interval,
         uint256 endTime,
         uint256 percentage,
-        uint256 maxCap
+        uint256 maxCap,
+        uint256 minimumContractBalance
     ) {
-        staking = new EventStaking(minimumStakingAmount, interval, endTime, percentage, maxCap);
+        staking = new EventStaking(
+            minimumStakingAmount,
+            interval,
+            endTime,
+            percentage,
+            maxCap,
+            minimumContractBalance
+        );
     }
 
     function fundMe() public payable {}

@@ -35,13 +35,14 @@ contract EventStaking is KeeperCompatibleInterface {
     StakingState private s_stakingState;
     PoolCap private s_poolCap;
     address[] public s_stakers;
-    uint256 public immutable i_MinimumStakingAmount;
     mapping(address => uint256) public s_addressToAmountStaked;
+    uint256 public immutable i_MinimumStakingAmount;
     uint256 private immutable i_interval;
+    uint256 private immutable i_endStakingTime;
+    uint256 private immutable i_percentage;
+    uint256 private immutable i_maxCap;
+    uint256 private immutable i_minimumContractBalance;
     uint256 private s_lastTimeStamp;
-    uint256 private s_endStakingTime;
-    uint256 private s_percentage;
-    uint256 private s_maxCap;
 
     event StakingEnter(address indexed staker);
     event RewardsDistributed(uint256 indexed rewardAmount);
@@ -53,6 +54,7 @@ contract EventStaking is KeeperCompatibleInterface {
      * @param endTime Time until staking pool becomes unlocked and funds withdrawn
      * @param percentage Percentage (integer) of rewards distributed
      * @param maxCap Maximum pool capacity in ETH
+     * @param minimumContractBalance Minimum amount of eth in contract
      */
 
     constructor(
@@ -60,16 +62,18 @@ contract EventStaking is KeeperCompatibleInterface {
         uint256 interval,
         uint256 endTime,
         uint256 percentage,
-        uint256 maxCap
+        uint256 maxCap,
+        uint256 minimumContractBalance
     ) payable {
         i_MinimumStakingAmount = minimumStakingAmount;
         s_stakingState = StakingState.OPEN;
         i_interval = interval;
         s_lastTimeStamp = block.timestamp;
-        s_endStakingTime = endTime;
-        s_percentage = percentage;
+        i_endStakingTime = endTime;
+        i_percentage = percentage;
         s_poolCap = PoolCap.OPEN;
-        s_maxCap = maxCap;
+        i_maxCap = maxCap;
+        i_minimumContractBalance = minimumContractBalance;
     }
 
     function enterPool() public payable {
@@ -82,7 +86,7 @@ contract EventStaking is KeeperCompatibleInterface {
         if (s_stakingState != StakingState.OPEN) {
             revert EventStaking__PoolNotOpen();
         }
-        if (address(this).balance >= s_maxCap) {
+        if (address(this).balance >= i_maxCap) {
             s_stakingState = StakingState.CLOSE;
             s_poolCap = PoolCap.FULL;
         }
@@ -99,14 +103,12 @@ contract EventStaking is KeeperCompatibleInterface {
     function checkUpkeep(
         bytes memory /*checkData */
     ) public override returns (bool upkeepNeeded, bytes memory /*performData */) {
-        if (
-            (block.timestamp - s_lastTimeStamp) > i_interval && s_stakingState != StakingState.ENDED
-        ) {
+        if (s_poolCap == PoolCap.FULL && s_stakingState != StakingState.ENDED) {
             s_stakingState = StakingState.OPEN;
         }
         bool isOpen = (StakingState.OPEN == s_stakingState);
         bool hasStakers = (s_stakers.length > 0);
-        bool hasBalance = (address(this).balance > 0);
+        bool hasBalance = (address(this).balance > i_minimumContractBalance);
         bool timePassed = (block.timestamp - s_lastTimeStamp) > i_interval;
         upkeepNeeded = (isOpen && hasStakers && hasBalance && timePassed);
     }
@@ -124,11 +126,11 @@ contract EventStaking is KeeperCompatibleInterface {
                 uint256(s_stakingState)
             );
         }
-        if ((block.timestamp - s_lastTimeStamp) > s_endStakingTime) {
+        if ((block.timestamp - s_lastTimeStamp) > i_endStakingTime) {
             withdraw();
         }
         s_stakingState = StakingState.CLOSE;
-        rewards(s_percentage);
+        rewards(i_percentage);
         s_lastTimeStamp = block.timestamp;
     }
 
@@ -179,7 +181,7 @@ contract EventStaking is KeeperCompatibleInterface {
     }
 
     function getEndTime() public view returns (uint256) {
-        return s_endStakingTime;
+        return i_endStakingTime;
     }
 
     function getLatestTimestamp() public view returns (uint256) {
@@ -187,10 +189,10 @@ contract EventStaking is KeeperCompatibleInterface {
     }
 
     function getPercentage() public view returns (uint256) {
-        return s_percentage;
+        return i_percentage;
     }
 
     function getMaxCap() public view returns (uint256) {
-        return s_maxCap;
+        return i_maxCap;
     }
 }
