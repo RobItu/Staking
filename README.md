@@ -1,13 +1,11 @@
-# Sample Hardhat Project
+# Event Staking
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This project is a platform for staking ETH. Currently, only the back-end has been developed. The front-end implementation will be coming soon. The project comes with unit and staging tests, as well as scripts that allow for easy funding and contract verification for Etherscan. Created using Solidity and Javascript built with the HardHat framework.
 
-Try running some of the following tasks:
+## How it works
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+Users can stake their ETH and be rewarded with timely interest. After a certain time all users funds and rewards will be transferred back to their owner's wallets. The minimum amount of ETH required to enter the pool, the amount of interest, the interval at which the rewards will be distributed, and the period until funds are withdrawn are dependent on the contract's owner discretion.
+
+## How to run it
+
+**THIS PROJECT HAS BEEN TESTED ON GOERLI'S TESTNET ONLY AND HAS NOT BEEN AUDITED FOR PROFESSIONAL USE**
